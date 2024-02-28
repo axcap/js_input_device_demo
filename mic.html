@@ -29,7 +29,7 @@ window.addEventListener('DOMContentLoaded', () => {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
       //audioInputDevicesSelect.innerHTML = '';
-      const audioInputDevices = devices.filter(device => device.kind === 'audioinput');
+      const audioInputDevices = devices.filter(device => true);
       audioInputDevices.forEach(device => {
         const option = document.createElement('option');
         option.value = device.deviceId;
