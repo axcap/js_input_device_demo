@@ -29,7 +29,7 @@ window.addEventListener('DOMContentLoaded', () => {
   async function updateAudioInputDevices() {
     try {
       const devices = await navigator.mediaDevices.enumerateDevices();
-      audioInputDevicesSelect.innerHTML = '';
+      //audioInputDevicesSelect.innerHTML = '';
       const audioInputDevices = devices.filter(device => device.kind === 'audioinput' || (device.kind === 'audioinput' && device.deviceType === 'audioinput'));
       audioInputDevices.forEach(device => {
         const option = document.createElement('option');
@@ -42,7 +42,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-    //   updateAudioInputDevices();
+  updateAudioInputDevices();
 
   // Start recording function
   async function startRecording() {
