@@ -24,6 +24,20 @@ window.addEventListener('DOMContentLoaded', () => {
   let mediaRecorder;
   let recordedChunks = [];
 
+  navigator.mediaDevices.getUserMedia (
+   {
+      audio: true
+   },
+
+   // successCallback
+   function(localMediaStream) {
+   },
+
+   // errorCallback
+   function(err) {
+   }
+);
+
   // Fetch available audio input devices and populate dropdown
   async function updateAudioInputDevices() {
     try {
