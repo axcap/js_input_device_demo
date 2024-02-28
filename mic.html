@@ -31,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
       //audioInputDevicesSelect.innerHTML = '';
       const audioInputDevices = devices.filter(device => true);
       audioInputDevices.forEach(device => {
-        debugger;
+        alert(device);
         const option = document.createElement('option');
         option.value = device.deviceId;
         option.text = device.label || `Microphone ${audioInputDevices.length}`;
