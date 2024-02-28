@@ -7,13 +7,11 @@
 </head>
 <body>
 <select id="audioInputDevices">
-    <option>No input</option>
-</select>
-<br><br>
+    <option value="1"></option>
+</select><br><br>
 <button id="startRecord">Start Recording</button>
 <button id="stopRecord" disabled>Stop Recording</button>
 <button id="play" disabled>Play Recording</button>
-<br><br>
 <audio id="audioPlayback" controls></audio>
 
 <script>
@@ -27,82 +25,78 @@ window.addEventListener('DOMContentLoaded', () => {
   let mediaRecorder;
   let recordedChunks = [];
 
-  
-  navigator.mediaDevices.getUserMedia (
-   // constraints
-   {
-      audio: true
-   },
-
-   // successCallback
-   function(localMediaStream) {
-    alert("Acces granted");
-   },
-
-   // errorCallback
-   function(err) {
-    alert("Could not get microphone access");
-   }
-);
-
   // Fetch available audio input devices and populate dropdown
-  navigator.mediaDevices.enumerateDevices()
-    .then(devices => {
-      const audioInputDevices = devices.filter(device => device.kind === 'audioinput' || device.kind === 'audioinput' && device.deviceType === 'audioinput');
+  async function updateAudioInputDevices() {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      audioInputDevicesSelect.innerHTML = '';
+      const audioInputDevices = devices.filter(device => device.kind === 'audioinput' || (device.kind === 'audioinput' && device.deviceType === 'audioinput'));
       audioInputDevices.forEach(device => {
         const option = document.createElement('option');
         option.value = device.deviceId;
         option.text = device.label || `Microphone ${audioInputDevices.length}`;
         audioInputDevicesSelect.add(option);
       });
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Error enumerating audio input devices:', error);
-    });
+    }
+  }
+
+  updateAudioInputDevices();
 
   // Start recording function
-  async function startRecording(stream) {
-    mediaRecorder = new MediaRecorder(stream);
+  async function startRecording() {
+    const selectedDeviceId = audioInputDevicesSelect.value;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: selectedDeviceId } });
 
-    mediaRecorder.ondataavailable = event => {
-      recordedChunks.push(event.data);
-    };
+      mediaRecorder = new MediaRecorder(stream);
 
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(recordedChunks, { type: 'audio/wav' });
-      const url = URL.createObjectURL(blob);
-      audioPlayback.src = url;
-    };
+      mediaRecorder.ondataavailable = event => {
+        recordedChunks.push(event.data);
+      };
 
-    startRecordButton.addEventListener('click', () => {
-      recordedChunks = [];
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+        const url = URL.createObjectURL(blob);
+        audioPlayback.src = url;
+      };
+
       mediaRecorder.start();
       startRecordButton.disabled = true;
       stopRecordButton.disabled = false;
       playButton.disabled = true;
-    });
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+    }
+  }
 
-    stopRecordButton.addEventListener('click', () => {
+  // Stop recording function
+  function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
       mediaRecorder.stop();
       startRecordButton.disabled = false;
       stopRecordButton.disabled = true;
       playButton.disabled = false;
-    });
-
-    playButton.addEventListener('click', () => {
-      audioPlayback.play();
-    });
+    }
   }
 
-  // Listen for changes in the selected audio input device
-  audioInputDevicesSelect.addEventListener('change', async () => {
-    const selectedDeviceId = audioInputDevicesSelect.value;
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: selectedDeviceId } });
-      startRecording(stream);
-    } catch (error) {
-      console.error('Error accessing microphone:', error);
+  // Play recording function
+  function playRecording() {
+    if (audioPlayback.src) {
+      audioPlayback.play();
     }
+  }
+
+  // Event listeners
+  startRecordButton.addEventListener('click', startRecording);
+  stopRecordButton.addEventListener('click', stopRecording);
+  playButton.addEventListener('click', playRecording);
+
+  // Listen for changes in the selected audio input device
+  audioInputDevicesSelect.addEventListener('change', () => {
+    stopRecording();
+    startRecording();
   });
 });
 </script>
