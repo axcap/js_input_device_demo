@@ -19,7 +19,6 @@
 window.addEventListener('DOMContentLoaded', () => {
   const startRecordButton = document.getElementById('startRecord');
   const stopRecordButton = document.getElementById('stopRecord');
-  const playButton = document.getElementById('play');
   const audioPlayback = document.getElementById('audioPlayback');
   const audioInputDevicesSelect = document.getElementById('audioInputDevices');
 
@@ -47,6 +46,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Start recording function
   async function startRecording() {
+    audioPlayback.disabled = true;
     const selectedDeviceId = audioInputDevicesSelect.value;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: selectedDeviceId } });
@@ -92,7 +92,6 @@ window.addEventListener('DOMContentLoaded', () => {
   // Event listeners
   startRecordButton.addEventListener('click', startRecording);
   stopRecordButton.addEventListener('click', stopRecording);
-  playButton.addEventListener('click', playRecording);
 
   // Listen for changes in the selected audio input device
   audioInputDevicesSelect.addEventListener('change', () => {
