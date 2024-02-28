@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microphone Recorder</title>
+</head>
+<body>
+<select id="audioInputDevices"></select><br><br>
+<button id="startRecord">Start Recording</button>
+<button id="stopRecord" disabled>Stop Recording</button>
+<button id="play" disabled>Play Recording</button>
+<audio id="audioPlayback" controls></audio>
+
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+  const startRecordButton = document.getElementById('startRecord');
+  const stopRecordButton = document.getElementById('stopRecord');
+  const playButton = document.getElementById('play');
+  const audioPlayback = document.getElementById('audioPlayback');
+  const audioInputDevicesSelect = document.getElementById('audioInputDevices');
+
+  let mediaRecorder;
+  let recordedChunks = [];
+
+  
+  navigator.getUserMedia (
+   // constraints
+   {
+      audio: true
+   },
+
+   // successCallback
+   function(localMediaStream) {
+   },
+
+   // errorCallback
+   function(err) {
+   }
+);
+
+  // Fetch available audio input devices and populate dropdown
+  navigator.mediaDevices.enumerateDevices()
+    .then(devices => {
+      const audioInputDevices = devices.filter(device => device.kind === 'audioinput' || device.kind === 'audioinput' && device.deviceType === 'audioinput');
+      audioInputDevices.forEach(device => {
+        const option = document.createElement('option');
+        option.value = device.deviceId;
+        option.text = device.label || `Microphone ${audioInputDevices.length}`;
+        audioInputDevicesSelect.add(option);
+      });
+    })
+    .catch(error => {
+      console.error('Error enumerating audio input devices:', error);
+    });
+
+  // Start recording function
+  async function startRecording(stream) {
+    mediaRecorder = new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable = event => {
+      recordedChunks.push(event.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(recordedChunks, { type: 'audio/wav' });
+      const url = URL.createObjectURL(blob);
+      audioPlayback.src = url;
+    };
+
+    startRecordButton.addEventListener('click', () => {
+      recordedChunks = [];
+      mediaRecorder.start();
+      startRecordButton.disabled = true;
+      stopRecordButton.disabled = false;
+      playButton.disabled = true;
+    });
+
+    stopRecordButton.addEventListener('click', () => {
+      mediaRecorder.stop();
+      startRecordButton.disabled = false;
+      stopRecordButton.disabled = true;
+      playButton.disabled = false;
+    });
+
+    playButton.addEventListener('click', () => {
+      audioPlayback.play();
+    });
+  }
+
+  // Listen for changes in the selected audio input device
+  audioInputDevicesSelect.addEventListener('change', async () => {
+    const selectedDeviceId = audioInputDevicesSelect.value;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: { deviceId: selectedDeviceId } });
+      startRecording(stream);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+    }
+  });
+});
+</script>
+</body>
+</html>
