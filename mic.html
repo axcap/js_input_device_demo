@@ -36,10 +36,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
    // successCallback
    function(localMediaStream) {
+    alert("Acces granted");
    },
 
    // errorCallback
    function(err) {
+    alert("Could not get microphone access");
    }
 );
 
