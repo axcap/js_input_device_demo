@@ -12,6 +12,7 @@
 <button id="startRecord">Start Recording</button>
 <button id="stopRecord" disabled>Stop Recording</button>
 <button id="play" disabled>Play Recording</button>
+<br><br>
 <audio id="audioPlayback" controls></audio>
 
 <script>
@@ -65,7 +66,7 @@ window.addEventListener('DOMContentLoaded', () => {
       mediaRecorder.start();
       startRecordButton.disabled = true;
       stopRecordButton.disabled = false;
-      playButton.disabled = true;
+      audioPlayback.disabled = true;
     } catch (error) {
       console.error('Error accessing microphone:', error);
     }
@@ -77,7 +78,7 @@ window.addEventListener('DOMContentLoaded', () => {
       mediaRecorder.stop();
       startRecordButton.disabled = false;
       stopRecordButton.disabled = true;
-      playButton.disabled = false;
+      audioPlayback.disabled = false;
     }
   }
 
